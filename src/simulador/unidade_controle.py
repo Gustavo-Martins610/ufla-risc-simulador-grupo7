@@ -18,6 +18,7 @@ class UnidadeControle:
         'LOAD':  0b00010000,
         'STORE': 0b00010001,
         'JR':    0b00010011,
+        'JAL':   0b00010111,
         'BEQ':   0b00010100,
         'BNE':   0b00010101,
         'J':     0b00010110,
