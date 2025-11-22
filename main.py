@@ -2,7 +2,7 @@ from src.interpretador.interpretador import Interpretador
 from src.simulador.processador import Processador
 
 def main():
-    caminho = "exemplos/add.txt"
+    caminho = "exemplos/test_jump.txt"
 
     memoria = Interpretador.carregar_arquivo(caminho)
 

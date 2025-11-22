@@ -111,5 +111,152 @@ class Instrucoes:
         cpu.flag_overflow = 0
 
         return resultado
+    
+    @staticmethod
+    def asr(cpu, ra, rb):
+        a = cpu.regs[ra]
+        shift = cpu.regs[rb] & 0x1F
+        sinal = (a >> 31) & 1
+
+        if shift == 0:
+            resultado = a
+        else:
+            resultado = (a >> shift) | ((0xFFFFFFFF << (32 - shift)) if sinal else 0)
+
+        resultado &= 0xFFFFFFFF
+
+        cpu.flag_zero = 1 if resultado == 0 else 0
+        cpu.flag_neg = 1 if (resultado >> 31) & 1 else 0
+        cpu.flag_carry = 0
+        cpu.flag_overflow = 0
+
+        return resultado
+    
+    @staticmethod
+    def lsl(cpu, ra, rb):
+        a = cpu.regs[ra]
+        shift = cpu.regs[rb] & 0x1F
+
+        resultado = (a << shift) & 0xFFFFFFFF
+
+        cpu.flag_zero = 1 if resultado == 0 else 0
+        cpu.flag_neg = 1 if (resultado >> 31) & 1 else 0
+        cpu.flag_carry = 0
+        cpu.flag_overflow = 0
+
+        return resultado
+    
+    @staticmethod
+    def lsr(cpu, ra, rb):
+        a = cpu.regs[ra]
+        shift = cpu.regs[rb] & 0x1F
+
+        resultado = (a >> shift) & 0xFFFFFFFF
+
+        cpu.flag_zero = 1 if resultado == 0 else 0
+        cpu.flag_neg = 1 if (resultado >> 31) & 1 else 0
+        cpu.flag_carry = 0
+        cpu.flag_overflow = 0
+
+        return resultado
+    
+    @staticmethod
+    def copy(cpu, ra):
+        resultado = cpu.regs[ra] & 0xFFFFFFFF
+
+        cpu.flag_zero = 1 if resultado == 0 else 0
+        cpu.flag_neg = 1 if (resultado >> 31) & 1 else 0
+        cpu.flag_carry = 0
+        cpu.flag_overflow = 0
+
+        return resultado
+    
+    @staticmethod
+    def lc_hi(cpu, const16, rc):
+        atual = cpu.regs[rc]
+        novo = ((const16 << 16) & 0xFFFF0000) | (atual & 0x0000FFFF)
+
+        cpu.flag_zero = 1 if novo == 0 else 0
+        cpu.flag_neg = 1 if (novo >> 31) & 1 else 0
+        cpu.flag_carry = 0
+        cpu.flag_overflow = 0
+
+        return novo & 0xFFFFFFFF
+    
+
+    @staticmethod
+    def lc_lo(cpu, const16, rc):
+        atual = cpu.regs[rc]
+        novo = (const16 & 0xFFFF) | (atual & 0xFFFF0000)
+
+        cpu.flag_zero = 1 if novo == 0 else 0
+        cpu.flag_neg = 1 if (novo >> 31) & 1 else 0
+        cpu.flag_carry = 0
+        cpu.flag_overflow = 0
+
+        return novo & 0xFFFFFFFF
+    
+
+    @staticmethod
+    def load(cpu, ra, rc):
+        endereco = cpu.regs[ra]
+
+        endereco = endereco & 0xFFFF
+
+        valor = cpu.memoria[endereco]
+
+        cpu.flag_zero = 1 if valor == 0 else 0
+        cpu.flag_neg = 1 if (valor >> 31) & 1 else 0
+        cpu.flag_carry = 0
+        cpu.flag_overflow = 0
+
+        return valor
+    
+
+    @staticmethod
+    def store(cpu, ra, rc):
+        endereco = cpu.regs[rc] & 0xFFFF
+        valor = cpu.regs[ra] & 0xFFFFFFFF
+
+        cpu.memoria[endereco] = valor
+
+        return None
+    
+    @staticmethod
+    def jump(cpu, endereco24):
+        cpu.pc = endereco24 & 0xFFFFFF
+
+    @staticmethod
+    def jal(cpu, endereco24):
+        cpu.regs[31] = cpu.pc
+        cpu.pc = endereco24 & 0xFFFFFF
+    
+    @staticmethod
+    def jr(cpu, ra):
+        cpu.pc = cpu.regs[ra] & 0xFFFFFFFF
+
+
+    @staticmethod
+    def beq(cpu, ra, rb, offset):
+        if cpu.regs[ra] == cpu.regs[rb]:
+            cpu.pc = cpu.pc + offset - 1
+
+    @staticmethod
+    def bne(cpu, ra, rb, offset):
+        if cpu.regs[ra] != cpu.regs[rb]:
+            cpu.pc = cpu.pc + offset - 1
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
