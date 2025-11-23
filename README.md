@@ -5,7 +5,7 @@ UFLA-RISC.
 - Gustavo Martins de oliveira
 - Diego Alves de Oliveira
 - Caio Bueno Finnochio
-- Luis
+- Luiz Felipe de Souza Marques
 - Matheus Gomes Monteiro
 
 ## Como Executar
