@@ -89,10 +89,6 @@ class Processador:
             self.pc = endereco
             Instrucoes.jump(self, endereco)
 
-        elif self.opcode == UnidadeControle.OPCODES['JAL']:
-            endereco = UnidadeControle.extrair_endereco24(self.ir)
-            Instrucoes.jal(self, endereco)
-
         elif self.opcode == UnidadeControle.OPCODES['JR']:
             self.pc = self.regs[self.ra]
             Instrucoes.jr(self, self.ra)
