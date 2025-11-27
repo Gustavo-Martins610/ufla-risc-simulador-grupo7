@@ -44,13 +44,13 @@ store r1, r2
 load r3, r2
 
 # 15. Se r4 == r5, faz jump
-jeq r4, r5, 2
+beq r4, r5, 2
 
 # 16. Se r6 != r7, faz jump
-jne r6, r7, 4
+bne r6, r7, 4
 
 # 17. Jump incondicional para r8
-j r8
+j 0x00000008
 
 # 18. Finaliza a execução
 halt
