@@ -2,7 +2,6 @@ from src.simulador.unidade_controle import UnidadeControle
 from src.simulador.instrucoes import Instrucoes
 from src.simulador.opcodes import OPCODES
 
-
 class Processador:
     def __init__(self):
         self.regs = [0] * 32
@@ -17,115 +16,152 @@ class Processador:
         self.rb = 0
         self.rc = 0
 
-
         self.pc = 0
         self.ir = 0
 
-        self.memoria = [0] * 65536
+        self.memoria = [0] * 65536  # Memória de 64K (65536 endereços)
 
         self.halted = False
 
     def carregar_programa(self, memoria_carregada):
-        
+        """
+        Carrega o programa na memória do processador
+        """
         for endereco, instrucao in memoria_carregada.items():
             self.memoria[endereco] = instrucao
 
     def ciclo_IF(self):
+        """
+        Fase de busca de instrução
+        """
+        if self.pc >= len(self.memoria) or self.pc < 0:  # Se o PC for inválido
+            self.halted = True
+            print(f"Erro: PC inválido. PC = {self.pc}. Encerrando execução.")
+            return
         
         self.ir = self.memoria[self.pc]
-        self.pc += 1
+        
+        # Se encontrar o HALT (32 bits 1)
+        if self.ir == 0xFFFFFFFF:  
+            print(f"Halt encontrado no PC = {self.pc}. Execução finalizada.")
+            self.halted = True
+        
+        self.pc += 1  # Incrementa o PC após a busca da instrução
 
     def ciclo_ID(self):
-
+        """
+        Fase de decodificação de instrução
+        """
+        if self.halted:
+            return
+        
         self.opcode = UnidadeControle.extrair_opcode(self.ir)
         self.ra = UnidadeControle.extrair_ra(self.ir)
         self.rb = UnidadeControle.extrair_rb(self.ir)
         self.rc = UnidadeControle.extrair_rc(self.ir)
-        
-        pass
     
     def ciclo_EX(self):
-        if self.opcode == UnidadeControle.OPCODES['ADD']: self.resultado_alu = Instrucoes.add(self, self.ra, self.rb)
-
-        elif self.opcode == UnidadeControle.OPCODES['SUB']: self.resultado_alu = Instrucoes.sub(self, self.ra, self.rb)
-
-        elif self.opcode == UnidadeControle.OPCODES['ZERO']: self.resultado_alu = Instrucoes.zeros(self, self.rc)
-
-        elif self.opcode == UnidadeControle.OPCODES['XOR']: self.resultado_alu = Instrucoes.xor(self, self.ra, self.rb)
-
-        elif self.opcode == UnidadeControle.OPCODES['OR']: self.resultado_alu = Instrucoes.or_(self, self.ra, self.rb)
-
-        elif self.opcode == UnidadeControle.OPCODES['NOT']: self.resultado_alu = Instrucoes.not_(self, self.ra)
-
-        elif self.opcode == UnidadeControle.OPCODES['AND']: self.resultado_alu = Instrucoes.and_(self, self.ra, self.rb)
-
-        elif self.opcode == UnidadeControle.OPCODES['ASL']: self.resultado_alu = Instrucoes.asl(self, self.ra, self.rb)
-
-        elif self.opcode == UnidadeControle.OPCODES['ASR']: self.resultado_alu = Instrucoes.asr(self, self.ra, self.rb)
-
-        elif self.opcode == UnidadeControle.OPCODES['LSL']: self.resultado_alu = Instrucoes.lsl(self, self.ra, self.rb)
-
-        elif self.opcode == UnidadeControle.OPCODES['LSR']: self.resultado_alu = Instrucoes.lsr(self, self.ra, self.rb)
-
-        elif self.opcode == UnidadeControle.OPCODES['COPY']: self.resultado_alu = Instrucoes.copy(self, self.ra)
-
+        """
+        Fase de execução
+        """
+        if self.halted:
+            return
+        
+        if self.opcode == UnidadeControle.OPCODES['ADD']:
+            self.resultado_alu = Instrucoes.add(self, self.ra, self.rb)
+        elif self.opcode == UnidadeControle.OPCODES['SUB']:
+            self.resultado_alu = Instrucoes.sub(self, self.ra, self.rb)
+        elif self.opcode == UnidadeControle.OPCODES['ZERO']:
+            self.resultado_alu = Instrucoes.zeros(self, self.rc)
+        elif self.opcode == UnidadeControle.OPCODES['XOR']:
+            self.resultado_alu = Instrucoes.xor(self, self.ra, self.rb)
+        elif self.opcode == UnidadeControle.OPCODES['OR']:
+            self.resultado_alu = Instrucoes.or_(self, self.ra, self.rb)
+        elif self.opcode == UnidadeControle.OPCODES['NOT']:
+            self.resultado_alu = Instrucoes.not_(self, self.ra)
+        elif self.opcode == UnidadeControle.OPCODES['AND']:
+            self.resultado_alu = Instrucoes.and_(self, self.ra, self.rb)
+        elif self.opcode == UnidadeControle.OPCODES['ASL']:
+            self.resultado_alu = Instrucoes.asl(self, self.ra, self.rb)
+        elif self.opcode == UnidadeControle.OPCODES['ASR']:
+            self.resultado_alu = Instrucoes.asr(self, self.ra, self.rb)
+        elif self.opcode == UnidadeControle.OPCODES['LSL']:
+            self.resultado_alu = Instrucoes.lsl(self, self.ra, self.rb)
+        elif self.opcode == UnidadeControle.OPCODES['LSR']:
+            self.resultado_alu = Instrucoes.lsr(self, self.ra, self.rb)
+        elif self.opcode == UnidadeControle.OPCODES['COPY']:
+            self.resultado_alu = Instrucoes.copy(self, self.ra)
         elif self.opcode == UnidadeControle.OPCODES['LC_HI']:
             const16 = UnidadeControle.extrair_const16(self.ir)
             self.resultado_alu = Instrucoes.lc_hi(self, const16, self.rc)
-
         elif self.opcode == UnidadeControle.OPCODES['LC_LO']:
             const16 = UnidadeControle.extrair_const16(self.ir)
             self.resultado_alu = Instrucoes.lc_lo(self, const16, self.rc)
-
-        elif self.opcode == UnidadeControle.OPCODES['LOAD']: self.resultado_alu = Instrucoes.load(self, self.ra, self.rc)
-
-        elif self.opcode == UnidadeControle.OPCODES['STORE']: 
+        elif self.opcode == UnidadeControle.OPCODES['LOAD']:
+            self.resultado_alu = Instrucoes.load(self, self.ra, self.rc)
+        elif self.opcode == UnidadeControle.OPCODES['STORE']:
             Instrucoes.store(self, self.ra, self.rc)
-            if hasattr(self, "resultado_alu"): 
+            if hasattr(self, "resultado_alu"):
                 del self.resultado_alu
-
-        elif self.opcode == UnidadeControle.OPCODES['J']: 
+        elif self.opcode == UnidadeControle.OPCODES['J']:
             endereco = UnidadeControle.extrair_endereco24(self.ir)
-            self.pc = endereco
+            self.pc = endereco  # Atualiza o PC com o endereço de desvio
             Instrucoes.jump(self, endereco)
-
         elif self.opcode == UnidadeControle.OPCODES['JR']:
-            self.pc = self.regs[self.ra]
+            self.pc = self.regs[self.ra]  # Atualiza o PC com o valor do registrador
             Instrucoes.jr(self, self.ra)
-
         elif self.opcode == UnidadeControle.OPCODES['BEQ']:
             offset = UnidadeControle.extrair_rc(self.ir)
             if self.regs[self.ra] == self.regs[self.rb]:
-                self.pc += offset
+                self.pc += offset  # Se for igual, faz o desvio
             Instrucoes.beq(self, self.ra, self.rb, offset)
-        
         elif self.opcode == UnidadeControle.OPCODES['BNE']:
             offset = UnidadeControle.extrair_rc(self.ir)
-            if self.regs[self.ra] == self.regs[self.rb]:
-                self.pc += offset
+            if self.regs[self.ra] != self.regs[self.rb]:
+                self.pc += offset  # Se for diferente, faz o desvio
             Instrucoes.bne(self, self.ra, self.rb, offset)
 
     def ciclo_WB(self):
+        """
+        Fase de escrita no registrador
+        """
+        if self.halted:
+            return
+        
         if hasattr(self, "resultado_alu"):
             self.regs[self.rc] = self.resultado_alu
             del self.resultado_alu
 
     def executar_ciclo(self):
+        """
+        Executa um ciclo completo de busca, decodificação, execução e escrita.
+        """
         if self.halted:
             return
         
         self.ciclo_IF()
         self.dump_estado("IF")
+        
+        # Verifica se o PC ultrapassou o tamanho da memória, se sim, parar
+        if self.pc >= len(self.memoria) or self.pc < 0:
+            self.halted = True
+            return
+        
         self.ciclo_ID()
         self.dump_estado("ID")
         self.ciclo_EX()
         self.dump_estado("EX")
         self.ciclo_WB()
         self.dump_estado("WB")
-        if self.ir == 0xFFFFFFFF:
+        
+        # Verifique se a instrução atual é um 'halt'
+        if self.ir == 0xFFFFFFFF:  # Geralmente, o halt é representado por 32 bits de 1
             self.halted = True
 
     def dump_estado(self, ciclo_nome):
+        """
+        Imprime o estado atual do processador durante a execução.
+        """
         print("\n" + "="*50)
         print(f"ESTÁGIO: {ciclo_nome}")
         print("-"*50)
@@ -140,4 +176,3 @@ class Processador:
         print("FLAGS:")
         print(f"NEG={self.flag_neg}  ZERO={self.flag_zero}  CARRY={self.flag_carry}  OVF={self.flag_overflow}")
         print("="*50)
-
