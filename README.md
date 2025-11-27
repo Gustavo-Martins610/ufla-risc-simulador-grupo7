@@ -8,7 +8,7 @@ Este projeto implementa um simulador funcional para o processador RISC de 32 bit
 - Diego Alves de Oliveira
 - Caio Bueno Finnochio
 - Luiz Felipe de Souza Marques
-<!-- - Matheus Gomes Monteiro -->
+- Matheus Gomes Monteiro
 
 ## Como Executar
 
