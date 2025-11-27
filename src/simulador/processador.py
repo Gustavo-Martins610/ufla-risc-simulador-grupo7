@@ -1,6 +1,6 @@
 from src.simulador.unidade_controle import UnidadeControle
 from src.simulador.instrucoes import Instrucoes
-from src.simulador.unidade_controle import UnidadeControle
+from src.simulador.opcodes import OPCODES
 
 
 class Processador:
